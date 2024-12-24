@@ -1,0 +1,36 @@
+---
+- name: Setup of LAMP Stack
+  hosts: all
+  become: true
+
+  vars:
+    php_packages:
+      - php
+      - php-mysql
+    web_server_packages:
+      Ubuntu: apache2
+      Amazon: httpd
+    mysql_package: mariadb-server
+
+  tasks:
+    - name: Enable Amazon Linux Extras for MariaDB
+      amazon.aws.amazon_linux_extras:
+        name: mariadb10.5
+        state: enabled
+
+    - name: Install Apache or httpd
+      package:
+        name: "{{ web_server_packages[ansible_distribution] }}"
+        state: present
+    
+    - name: Install MySQL
+      package:
+        name: "{{ mysql_package }}"
+        state: present
+
+    - name: Install PHP packages
+      package:
+        name: "{{ php_packages }}"
+        state: present
+
+
