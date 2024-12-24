@@ -1,0 +1,11 @@
+---
+- name: Check disk space and store the output in a variable
+  hosts: all
+  tasks:
+    - name: Get Disk usage
+      shell: df -h
+      register: disk_output
+
+    - name: Show disk usage
+      debug:
+        msg: "Disk output is {{ disk_output.stdout_lines }}" 
