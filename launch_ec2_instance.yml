@@ -1,0 +1,82 @@
+---
+- name: Provision Ec2 instance & install XX
+  hosts: localhost
+  gather_facts: no
+
+  tasks:
+    - name: Adding SSH access to a security group
+      amazon.aws.ec2_group:
+        name: default 
+        description: Security group for Ec2 instances
+        region: ap-south-1
+        rules:
+          - proto: tcp
+            from_port: 8080
+            to_port: 8080
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            cidr_ip: 0.0.0.0/0
+        rules_egress: 
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+      register: security_group
+
+    - name: Launch Ec2 instnace
+      amazon.aws.ec2_instance:
+        name: Ansible-created-instance
+        key_name: zaki-test
+        region: ap-south-1
+        instance_type: t2.micro
+        image_id: ami-0fd05997b4dff7aac
+        count: 1
+        security_group: "{{ security_group.group_id }}"
+      register: ec2
+    
+    - name: Wait for instance to be ready
+      wait_for: 
+        host: "{{ ec2.instances[0].public_dns_name }}"
+        port: 22
+        delay: 30 
+        timeout: 300
+        state: started
+      when: ec2.instances is defined and ec2.instances | length > 0
+    
+    - name: Add the Ec2 instance to the inventory dynamically
+      add_host: 
+        name: "{{ec2.instances[0].public_dns_name}}"
+        groups: dynamic_hosts
+        ansible_ssh_private_key_file: "/Users/zakimd/Desktop/devops/zaki-key.pem"
+        ansible_user: ec2-user
+      
+    - name: Debug dynamic inventory
+      debug: 
+        var: groups['dynamic_hosts']
+
+    - name: Install Apache on dynamically added Ec2 instance
+      become: yes
+      package: 
+        name: httpd
+        state: present
+      delegate_to: "{{ item }}"
+      with_items:
+        - "{{ groups['dynamic_hosts'] }}"
+      vars: 
+        ansible_ssh_private_key_file: "/Users/zakimd/Desktop/devops/zaki-key.pem"
+        ansible_user: ec2-user
+      when: groups["dynamic_hosts"] is defined and groups["dynamic_hosts"] | length >0
+
+    - name: Start apache service on ec2 instance
+      become: yes
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+      delegate_to: "{{ item }}"
+      with_items:
+        - "{{ groups['dynamic_hosts'] }}"
+      vars: 
+        ansible_ssh_private_key_file: "/Users/zakimd/Desktop/devops/zaki-key.pem"
+        ansible_user: ec2-user
+      when: groups["dynamic_hosts"] is defined and groups["dynamic_hosts"] | length >0

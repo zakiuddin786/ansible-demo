@@ -2,18 +2,14 @@
 - name: Installing Nginx and cronjob configuring it
   hosts: all
   become: true
-
   vars: 
     package_name: 
       Ubuntu: apache2
       Amazon: httpd
-
   tasks: 
-
     - name: Printing OS versions
       debug:
         msg: "This OS is {{ ansible_distribution }}"
-
     - name: Install apache webserver on Al2
       yum: 
         name: "{{ package_name['Amazon'] }}"
