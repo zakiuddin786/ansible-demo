@@ -1,0 +1,37 @@
+---
+- name: Installing Apache, Nginx and cronjob configuring it
+  hosts: all
+  become: true
+  vars: 
+    apache_package_name: 
+      Ubuntu: apache2
+      Amazon: httpd
+    cron_package_name:
+      Ubuntu: cron
+      Amazon: cronie
+  tasks: 
+    - name: Printing OS versions
+      debug:
+        msg: "This OS is {{ ansible_distribution }}"
+        
+    - name: Install apache webserver
+      package: 
+        name: "{{ apache_package_name[ansible_distribution] }}"
+        state: present
+
+    - name: Install Nginx
+      package:
+        name: nginx
+        state: present
+
+    - name: Install Cronjob
+      package:
+        name: "{{cron_package_name[ansible_distribution]}}"
+        state: present
+      
+    - name: Start Nginx 
+      service:
+        name: nginx
+        state: started
+        enabled: true
+      
