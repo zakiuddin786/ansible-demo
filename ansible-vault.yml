@@ -1,0 +1,15 @@
+---
+- name: Copying the aws_key
+  hosts: aws_linux
+  become: yes
+  vars: 
+    app_name: devops
+
+  vars_files:
+    - "secret.yml"
+
+  tasks:
+    - name: Copy the db pass
+      copy:
+        content: "{{ db_password }}"
+        dest: /etc/{{ app_name }}_db_pass.txt

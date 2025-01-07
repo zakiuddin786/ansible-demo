@@ -2,12 +2,11 @@
 - name: Provision Ec2 instance & install XX
   hosts: localhost
   gather_facts: no
-
   tasks:
     - name: Adding SSH access to a security group
       amazon.aws.ec2_group:
-        name: default 
-        description: Security group for Ec2 instances
+        name: zaki-security 
+        description: Security group for Ec2 instances launched via ansible
         region: ap-south-1
         rules:
           - proto: tcp
@@ -23,7 +22,7 @@
             cidr_ip: 0.0.0.0/0
       register: security_group
 
-    - name: Launch Ec2 instnace
+    - name: Launch Ec2 instance
       amazon.aws.ec2_instance:
         name: Ansible-created-instance
         key_name: zaki-test
@@ -34,7 +33,7 @@
         security_group: "{{ security_group.group_id }}"
       register: ec2
     
-    - name: Wait for instance to be ready
+    - name: Waiting for instance to be ready
       wait_for: 
         host: "{{ ec2.instances[0].public_dns_name }}"
         port: 22

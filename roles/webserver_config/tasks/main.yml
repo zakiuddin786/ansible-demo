@@ -1,0 +1,29 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for webserver_config
+- name: Install Apache on dynamically added Ec2 instance
+  become: yes
+  package: 
+    name: httpd
+    state: present
+  delegate_to: "{{ item }}"
+  with_items:
+    - "{{ groups['dynamic_hosts'] }}"
+  vars: 
+    ansible_ssh_private_key_file: "/Users/zakimd/Desktop/devops/zaki-key.pem"
+    ansible_user: ec2-user
+  when: groups["dynamic_hosts"] is defined and groups["dynamic_hosts"] | length >0
+
+- name: Start apache service on ec2 instance
+  become: yes
+  service:
+    name: httpd
+    state: started
+    enabled: yes
+  delegate_to: "{{ item }}"
+  with_items:
+    - "{{ groups['dynamic_hosts'] }}"
+  vars: 
+    ansible_ssh_private_key_file: "/Users/zakimd/Desktop/devops/zaki-key.pem"
+    ansible_user: ec2-user
+  when: groups["dynamic_hosts"] is defined and groups["dynamic_hosts"] | length >0

@@ -9,7 +9,6 @@
       Amazon: httpd
 
   tasks: 
-
     - name: Install packages on Ubuntu
       apt: 
         name: "{{ item }}"
