@@ -9,13 +9,17 @@
     cron_package_name:
       Ubuntu: cron
       Amazon: cronie
+    node_package_name:
+      Amazon: nodejs
+      Ubuntu: node
     package_names: 
       - pk_name: "{{apache_package_name[ansible_distribution]}}"
       - pk_name: "{{cron_package_name[ansible_distribution]}}"
       - pk_name: nginx
       - pk_name: git
-      - pk_name: nodejs
+      - pk_name: "{{node_package_name[ansible_distribution]}}"
       - pk_name: docker
+      - pk_name: php
   tasks: 
     - name: Install packages
       package: 

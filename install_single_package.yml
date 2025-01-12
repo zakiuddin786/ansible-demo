@@ -1,0 +1,41 @@
+---
+- name: Installing Nginx
+  hosts: all
+  become: true
+  tasks:
+    - name: Install Nginx
+      package:
+        name: nginx
+        state: present
+    
+    - name: Create a new user
+      user:
+        name: zaki
+
+    - name: Install Apache on ubuntu
+      package: 
+        name: apache2
+        state: present
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install Apache on AL2
+      package: 
+        name: httpd
+        state: present
+      when: ansible_distribution == "Amazon"
+
+    - name: Install Nodejs on AL2
+      package: 
+        name: nodejs
+        state: present
+      when: ansible_distribution == "Amazon"
+
+    - name: Install Docker
+      package: 
+        name: docker
+        state: present
+
+    - name: Install unzip
+      package: 
+        name: unzip
+        state: present
